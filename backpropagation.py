@@ -16,6 +16,8 @@ class BackPropagation:
         num_test = len(random_data) - num_train
         self.train = random_data[:num_train, [2, 3, 4]]
         self.test = random_data[num_train:, [2, 3, 4]]
+        self.mean = np.mean(self.train, axis=0)
+        self.sd = np.std(self.train, axis=0)
 
     def training(self, train_data, eta=0.1):
         self.w =  np.random.rand(8)
@@ -29,7 +31,7 @@ class BackPropagation:
                 d1 = 0.1
                 d2 = 0.9
             self.updateWeight(y1, d1, y2, d2)
-            # print (y1-d1)
+            # print (self.w)
 
     def forward(self, x):
         x1, x2 = x[0], x[1]
@@ -82,9 +84,16 @@ class BackPropagation:
                 corect += 1
         return corect/len(test)
 
+    def zScoreNormalize(self, dataset):
+        for data in dataset:
+            for i in range(len(data)-1):
+                data[i] = (data[i] - self.mean[i]) / self.sd[i]
+
 if __name__ == '__main__':
     np.set_printoptions(precision=3)
     bp = BackPropagation('iris_data_set/iris.data')
     bp.randomSplitData(train_size=0.7)
-    bp.training(bp.train, eta=0.001)
+    bp.zScoreNormalize(bp.train)
+    bp.zScoreNormalize(bp.test)
+    bp.training(bp.train, eta=0.1)
     print (bp.testing(bp.test))
