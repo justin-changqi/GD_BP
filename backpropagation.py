@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import math
+import matplotlib.pyplot as plt
 
 class BackPropagation:
     def __init__(self, file_name):
@@ -19,19 +20,22 @@ class BackPropagation:
         self.mean = np.mean(self.train, axis=0)
         self.sd = np.std(self.train, axis=0)
 
-    def training(self, train_data, eta=0.1):
+    def training(self, train_data, epoche=1000, learning_rate=0.1):
         self.w =  np.random.rand(8)
-        self.eta = eta
-        for data in train_data:
-            y1, y2 = self.forward(data)
-            if (data[-1] == 1):
-                d1 = 0.9
-                d2 = 0.1
-            else:
-                d1 = 0.1
-                d2 = 0.9
-            self.updateWeight(y1, d1, y2, d2)
-            # print (self.w)
+        self.eta = learning_rate
+        errors = []
+        for i in range(epoche):
+            for data in train_data:
+                y1, y2 = self.forward(data)
+                if (data[-1] == 1):
+                    d1 = 0.9
+                    d2 = 0.1
+                else:
+                    d1 = 0.1
+                    d2 = 0.9
+                self.updateWeight(y1, d1, y2, d2)
+            errors.append(pow(y1-d1, 2)/2 + pow(y2-d2, 2)/2)
+        return errors
 
     def forward(self, x):
         x1, x2 = x[0], x[1]
@@ -69,7 +73,7 @@ class BackPropagation:
                            w[4]-eta*dw5, w[5]-eta*dw6, w[6]-eta*dw7, w[7]-eta*dw8])
 
     def sigmoid(self, x):
-        return 1 / (1 + math.exp(-x))
+        return 1. / (1. + math.exp(-x))
 
     def testing(self, test):
         corect = 0
@@ -95,5 +99,9 @@ if __name__ == '__main__':
     bp.randomSplitData(train_size=0.7)
     bp.zScoreNormalize(bp.train)
     bp.zScoreNormalize(bp.test)
-    bp.training(bp.train, eta=0.1)
+    errors = bp.training(bp.train, epoche=10000, learning_rate=0.01)
     print (bp.testing(bp.test))
+    plt.plot(errors)
+    plt.ylabel('MSE')
+    plt.xlabel('epoche')
+    plt.show()
