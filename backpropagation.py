@@ -25,6 +25,7 @@ class BackPropagation:
         self.eta = learning_rate
         errors = []
         for i in range(epoche):
+            error = 0
             for data in train_data:
                 y1, y2 = self.forward(data)
                 if (data[-1] == 1):
@@ -33,8 +34,9 @@ class BackPropagation:
                 else:
                     d1 = 0.1
                     d2 = 0.9
+                error += pow(y1-d1, 2)/2 + pow(y2-d2, 2)/2
                 self.updateWeight(y1, d1, y2, d2)
-            errors.append(pow(y1-d1, 2)/2 + pow(y2-d2, 2)/2)
+            errors.append(error/len(train_data))
         return errors
 
     def forward(self, x):
@@ -100,7 +102,7 @@ if __name__ == '__main__':
     bp.zScoreNormalize(bp.train)
     bp.zScoreNormalize(bp.test)
     errors = bp.training(bp.train, epoche=10000, learning_rate=0.01)
-    print (bp.testing(bp.test))
+    print ('Accuracy:', bp.testing(bp.test))
     plt.plot(errors)
     plt.ylabel('MSE')
     plt.xlabel('epoche')
