@@ -20,7 +20,7 @@ class BackPropagation:
         self.mean = np.mean(self.train, axis=0)
         self.sd = np.std(self.train, axis=0)
 
-    def training(self, train_data, epoche=1000, learning_rate=0.1):
+    def training(self, train_data, epoche=1000, learning_rate=0.001):
         self.w =  np.random.rand(8)
         self.eta = learning_rate
         errors = []
@@ -37,6 +37,7 @@ class BackPropagation:
                 error += pow(y1-d1, 2)/2 + pow(y2-d2, 2)/2
                 self.updateWeight(y1, d1, y2, d2)
             errors.append(error/len(train_data))
+            # print (self.w)
         return errors
 
     def forward(self, x):
@@ -91,17 +92,24 @@ class BackPropagation:
         return corect/len(test)
 
     def zScoreNormalize(self, dataset):
-        for data in dataset:
-            for i in range(len(data)-1):
-                data[i] = (data[i] - self.mean[i]) / self.sd[i]
+        num_data = len(dataset)
+        num_feature = len(dataset[0])-1
+        new_set = np.zeros(dataset.shape)
+        for i in range(num_data):
+            for j in range(num_feature):
+                new_set[i][j] = (dataset[i][j] - self.mean[j]) / self.sd[j]
+            new_set[i][-1] = dataset[i][-1]
+        return new_set
 
 if __name__ == '__main__':
     np.set_printoptions(precision=3)
     bp = BackPropagation('iris_data_set/iris.data')
+
     bp.randomSplitData(train_size=0.7)
-    bp.zScoreNormalize(bp.train)
-    bp.zScoreNormalize(bp.test)
-    errors = bp.training(bp.train, epoche=10000, learning_rate=0.01)
+    bp.train = bp.zScoreNormalize(bp.train)
+    bp.test = bp.zScoreNormalize(bp.test)
+    errors = bp.training(bp.train, epoche=3500, learning_rate=0.01)
+    print (bp.w)
     print ('Accuracy:', bp.testing(bp.test))
     plt.plot(errors)
     plt.ylabel('MSE')
