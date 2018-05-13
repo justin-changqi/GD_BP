@@ -34,7 +34,7 @@ class BackPropagation:
                 else:
                     d1 = 0.1
                     d2 = 0.9
-                error += pow(y1-d1, 2)/2 + pow(y2-d2, 2)/2
+                error += (pow(y1-d1, 2) + pow(y2-d2, 2))/2.0
                 self.updateWeight(y1, d1, y2, d2)
             errors.append(error/len(train_data))
             # print (self.w)
@@ -60,10 +60,10 @@ class BackPropagation:
         eta = self.eta
         e1_dz1 = (y1-d1)*y1*(1-y1)
         e2_dz2 = (y2-d2)*y2*(1-y2)
-        z1_dq1 = w[4]*self.q1*(1-self.q1)
-        z1_dq2 = w[5]*self.q2*(1-self.q2)
-        z2_dq1 = w[6]*self.q1*(1-self.q1)
-        z2_dq2 = w[7]*self.q2*(1-self.q2)
+        z1_dq1 = w[4]*self.h1*(1-self.h1)
+        z1_dq2 = w[5]*self.h2*(1-self.h2)
+        z2_dq1 = w[6]*self.h1*(1-self.h1)
+        z2_dq2 = w[7]*self.h2*(1-self.h2)
         dw1 = e1_dz1*z1_dq1*self.x1 + e2_dz2*z2_dq1*self.x1
         dw2 = e1_dz1*z1_dq1*self.x2 + e2_dz2*z2_dq1*self.x2
         dw3 = e1_dz1*z1_dq2*self.x1 + e2_dz2*z2_dq2*self.x1
@@ -102,16 +102,18 @@ class BackPropagation:
         return new_set
 
 if __name__ == '__main__':
+    accuracy = []
     np.set_printoptions(precision=3)
     bp = BackPropagation('iris_data_set/iris.data')
-
-    bp.randomSplitData(train_size=0.7)
-    bp.train = bp.zScoreNormalize(bp.train)
-    bp.test = bp.zScoreNormalize(bp.test)
-    errors = bp.training(bp.train, epoche=3500, learning_rate=0.01)
-    print (bp.w)
-    print ('Accuracy:', bp.testing(bp.test))
-    plt.plot(errors)
+    for i in range(10):
+        bp.randomSplitData(train_size=0.7)
+        bp.train = bp.zScoreNormalize(bp.train)
+        bp.test = bp.zScoreNormalize(bp.test)
+        errors = bp.training(bp.train, epoche=3500, learning_rate=0.01)
+        accuracy.append(bp.testing(bp.test))
+        print ('Round', i+1,'accuracy:', accuracy[i])
+        plt.plot(errors)
+    print ('Average accuracy:', np.array(accuracy).mean())
     plt.ylabel('MSE')
     plt.xlabel('epoche')
     plt.show()
